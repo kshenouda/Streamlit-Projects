@@ -1,7 +1,7 @@
 # Theme config
 [theme]
 base = "dark"
-primaryColor = "#90D5FF"
+primaryColor = "#0096FF"
 backgroundColor = "#0E1117"
 secondaryBackgroundColor = "#262730"
 textColor = "#FAFAFA"
