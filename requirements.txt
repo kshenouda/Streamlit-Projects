@@ -1,0 +1,9 @@
+altair
+google
+gspread
+pandas
+numpy
+plotly.express
+requests
+s3fs==0.4.*
+streamlit==1.1.*
