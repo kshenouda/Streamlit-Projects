@@ -35,15 +35,38 @@ st.sidebar.write('**Rows**: ', str(len(df)))
 st.sidebar.write('**Columns**:', str(len(df.columns)))
 
 st.sidebar.header('Filter options')
-tv_range = st.sidebar.slider('TV', df['TV'].min(), df['TV'].max(),
-                             (df['TV'].min(), df['TV'].max()))
-radio_range = st.sidebar.slider('Radio', df['Radio'].min(), df['Radio'].max(),
-                                (df['Radio'].min(), df['Radio'].max()))
-newspaper_range = st.sidebar.slider('Newspaper', df['Newspaper'].min(), df['Newspaper'].max(),
-                                    (df['Newspaper'].min(), df['TV'].max()))   
-sales_range = st.sidebar.slider('Sales', df['Sales'].min(), df['Sales'].max(),
-                                (df['Sales'].min(), df['Sales'].max()))   
 
+if st.sidebar.button('Reset filters'):
+    st.session_state.tv_range = (df['TV'].min(), df['TV'].max())
+    st.session_state.radio_range = (df['Radio'].min(), df['Radio'].max())
+    st.session_state.newspaper_range = (df['Newspaper'].min(), df['Newspaper'].max())
+    st.session_state.sales_range = (df['Sales'].min(), df['Sales'].max())
+    st.rerun()
+
+tv_range = st.sidebar.slider(
+    'TV', 
+    df['TV'].min(), df['TV'].max(),
+    (df['TV'].min(), df['TV'].max()),
+    key='tv_range'
+)
+radio_range = st.sidebar.slider(
+    'Radio', 
+    df['Radio'].min(), df['Radio'].max(),
+    (df['Radio'].min(), df['Radio'].max()),
+    key='radio_range'
+)
+newspaper_range = st.sidebar.slider(
+    'Newspaper', 
+    df['Newspaper'].min(), df['Newspaper'].max(),
+    (df['Newspaper'].min(), df['Newspaper'].max()),
+    key='newspaper_range'
+)   
+sales_range = st.sidebar.slider(
+    'Sales', 
+    df['Sales'].min(), df['Sales'].max(),
+    (df['Sales'].min(), df['Sales'].max()),
+    key='sales_range'
+)   
 
 filtered_df = df[
     (df['TV'].between(tv_range[0], tv_range[1])) &
@@ -56,8 +79,14 @@ filtered_df = df[
 #if remove_outliers:
 #    filtered_df = filtered_df[filtered_df['TV'] < filtered_df['TV'].quantile(0.99)]
 
-with st.expander('View raw dataset'):
-    st.dataframe(df)
+df_col1, df_col2 = st.columns(2)
+with df_col1:
+    with st.expander('View full dataset'):
+        st.dataframe(df)
+
+with df_col2:
+    with st.expander('View filtered dataset'):
+        st.dataframe(filtered_df)
 
 col1, col2 = st.columns(2)
 
@@ -88,10 +117,14 @@ with col2:
     else:
         st.info('Select a column to visualize')
 
-with st.expander('Linear Regression Model Details'):
+tab1, tab2, tab3, tab4 = st.tabs(['Linear Regression Model', 'Scatter Plots', 'Heatmap', 'Try Your Own Ad Budget'])
+
+with tab1:
+# with st.expander('Linear Regression Model Details'):
     # st.subheader('Linear Regression')
     X = df.drop('Sales', axis=1)
     y = df['Sales']
+    st.caption('Model is trained on full dataset (not filtered data)')
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42
@@ -116,13 +149,13 @@ with st.expander('Linear Regression Model Details'):
         st.write(f'**Training RMSE**: {train_rmse:.4f}')
 
         test_rmse = mean_squared_error(y_test, model.predict(X_test), squared=False)
-        st.write(f'**Test RMSE**: {train_rmse:.4f}')
+        st.write(f'**Test RMSE**: {test_rmse:.4f}')
 
     coeff_df = pd.DataFrame({
         'Feature': X.columns,
         'Coefficient': model.coef_
     }).sort_values(by='Coefficient', ascending=False)
-    coeff_df
+    st.dataframe(coeff_df)
 
     fig = px.bar(coeff_df, x='Coefficient', y='Feature',
                 title='Model Feature Importance',
@@ -136,35 +169,38 @@ with st.expander('Linear Regression Model Details'):
                      trendline='ols')
     st.plotly_chart(fig, use_container_width=True)
 
-with st.container():
-    with st.expander('Scatter Plots'):
-        # st.subheader('Scatter Plots')
-        col1, col2 = st.columns(2)
-        all_cols = df.columns
-        with col1:
-            x_col = st.selectbox('Choose an column for the X-axis', df.columns, index=None)
-        available_cols = [
-            col for col in all_cols if col != x_col
-        ]
-        with col2:
-            y_col = st.selectbox('Choose an column for the Y-axis', available_cols, index=None)
+with tab2:
+# with st.expander('Scatter Plots'):
+    # st.subheader('Scatter Plots')
+    col1, col2 = st.columns(2)
+    all_cols = df.columns
+    with col1:
+        x_col = st.selectbox('Choose an column for the X-axis', df.columns, index=0)
+    available_cols = [
+        col for col in all_cols if col != x_col
+    ]
+    with col2:
+        y_col = st.selectbox('Choose an column for the Y-axis', available_cols, index=0)
 
-        if x_col and y_col:
-            fig = px.scatter(filtered_df, x=x_col, y=y_col,
-                            title=f'Scatterplot Between {x_col} and {y_col}',
-                            trendline='ols')
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info('Please select an X-axis and Y-axis to generate a scatterplot')
-
-    with st.expander('Heatmap'):
-        st.subheader('Correlation Heatmap')
-        corr = df.corr()
-        fig = px.imshow(corr, text_auto=True, title='Correlation Heatmap')
+    if x_col and y_col:
+        fig = px.scatter(filtered_df, x=x_col, y=y_col,
+                        title=f'Scatterplot Between {x_col} and {y_col}',
+                        trendline='ols')
         st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info('Please select an X-axis and Y-axis to generate a scatterplot')
 
-with st.expander('Try Your Own Ad Budget'):
+with tab3:
+# with st.expander('Heatmap'):
+    st.subheader('Correlation Heatmap')
+    corr = df.corr()
+    fig = px.imshow(corr, text_auto=True, title='Correlation Heatmap')
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab4:
+# with st.expander('Try Your Own Ad Budget'):
     # st.subheader('Try Your Own Ad Budget')
+    st.write("### Adjust ad budgets to estimate sales")
 
     tv = st.slider('TV', 0.0, 300.0, 100.0)
     radio = st.slider('Radio', 0.0, 60.0, 20.0)
@@ -172,4 +208,4 @@ with st.expander('Try Your Own Ad Budget'):
 
     input_data = np.array([[tv, radio, newspaper]])
     prediction = model.predict(input_data[0].reshape(1,-1))
-    st.metric('Predicted Sales', f'{prediction}')
+    st.metric('Predicted Sales', f'${prediction[0]:.2f}')
