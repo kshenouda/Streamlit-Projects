@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import root_mean_squared_error
 
 st.set_page_config(page_title='Advertising Dashboard', layout='wide')
 st.title('Advertising Dashboard')
@@ -155,10 +155,10 @@ with tab1:
 
     with r2_col2:
         st.subheader('RMSE')
-        train_rmse = mean_squared_error(y_train, model.predict(X_train), squared=False)
+        train_rmse = root_mean_squared_error(y_train, model.predict(X_train), squared=False)
         st.write(f'**Training RMSE**: {train_rmse:.4f}')
 
-        test_rmse = mean_squared_error(y_test, model.predict(X_test), squared=False)
+        test_rmse = root_mean_squared_error(y_test, model.predict(X_test), squared=False)
         st.write(f'**Test RMSE**: {test_rmse:.4f}')
 
     coeff_df = pd.DataFrame({
