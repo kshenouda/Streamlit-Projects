@@ -1,12 +1,13 @@
 altair
 google
 gspread
-pandas
 numpy
+pandas
 plotly
+protobuf>=3.20.0
 requests
 s3fs==2024.10.0
-streamlit>=1.28.0
-protobuf>=3.20.0
 scikit-learn
 scipy
+streamlit>=1.28.0
+vega_datasets
