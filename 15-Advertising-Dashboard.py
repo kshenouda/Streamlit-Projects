@@ -177,8 +177,8 @@ with tab1:
     train_preds = model.predict(X_train)
     fig = px.scatter(x=y_train, y=train_preds,
                      labels={'x': 'Actual Sales', 'y': 'Predicted Sales'},
-                     title = 'Predicted vs. Actual Sales',
-                     trendline='ols')
+                     title = 'Predicted vs. Actual Sales')
+                     # trendline='ols')
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
@@ -196,8 +196,8 @@ with tab2:
 
     if x_col and y_col:
         fig = px.scatter(filtered_df, x=x_col, y=y_col,
-                        title=f'Scatterplot Between {x_col} and {y_col}',
-                        trendline='ols')
+                        title=f'Scatterplot Between {x_col} and {y_col}')
+                        # trendline='ols')
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.info('Please select an X-axis and Y-axis to generate a scatterplot')
