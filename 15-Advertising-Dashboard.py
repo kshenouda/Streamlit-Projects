@@ -155,10 +155,12 @@ with tab1:
 
     with r2_col2:
         st.subheader('RMSE')
-        train_rmse = mean_squared_error(y_train, model.predict(X_train), squared=False)
+        train_mse = mean_squared_error(y_train, model.predict(X_train))
+        train_rmse = train_mse ** 0.5
         st.write(f'**Training RMSE**: {train_rmse:.4f}')
 
-        test_rmse = mean_squared_error(y_test, model.predict(X_test), squared=False)
+        test_mse = mean_squared_error(y_test, model.predict(X_test))
+        test_rmse = test_mse ** 0.5
         st.write(f'**Test RMSE**: {test_rmse:.4f}')
 
     coeff_df = pd.DataFrame({
