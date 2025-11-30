@@ -214,9 +214,9 @@ with tab4:
     # st.subheader('Try Your Own Ad Budget')
     st.write("### Adjust ad budgets to estimate sales")
 
-    tv = st.slider('TV', 0.0, 300.0, 100.0)
-    radio = st.slider('Radio', 0.0, 60.0, 20.0)
-    newspaper = st.slider('Newspaper', 0.0, 120.0, 30.0)
+    tv = st.slider('TV', 0, 300, 100)
+    radio = st.slider('Radio', 0, 60, 20)
+    newspaper = st.slider('Newspaper', 0, 120, 30)
 
     input_data = np.array([[tv, radio, newspaper]])
     prediction = model.predict(input_data[0].reshape(1,-1))
