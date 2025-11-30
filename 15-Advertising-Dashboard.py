@@ -17,7 +17,13 @@ and a linear regression model.
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv('/Users/kiroshenouda/Desktop/COMPSCI/DATASETS/advertising.csv')
+    # Sample advertising dataset - Replace with your own URL or upload
+    url = 'https://raw.githubusercontent.com/selva86/datasets/master/advertising.csv'
+    try:
+        df = pd.read_csv(url)
+    except:
+        st.error('Could not load dataset from URL. Please upload a CSV file.')
+        df = None
     return df
 
 uploaded_file = st.sidebar.file_uploader('Upload Advertising Dataset', type='csv')
@@ -26,6 +32,10 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
 else:
     df = load_data()
+
+if df is None:
+    st.error('Unable to load data. Please upload a CSV file.')
+    st.stop()
 
 def fmt(n): 
     return f'${n:,.2f}'
