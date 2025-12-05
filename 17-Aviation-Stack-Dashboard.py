@@ -17,7 +17,8 @@ aspects of aviation data, including flight status, airline information, and airp
 st.divider()
 
 url = 'https://api.aviationstack.com/v1/'
-api_key = st.secrets['AVIATIONSTACK_API_KEY']
+# api_key = st.secrets['AVIATIONSTACK_API_KEY']
+api_key = '04360d2c8eff0da265c69169b6e68b87'
 #endpoints = [
 #    'flights', 
 #    'routes', 
