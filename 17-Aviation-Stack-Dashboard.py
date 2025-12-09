@@ -20,22 +20,30 @@ url = 'https://api.aviationstack.com/v1/'
 # api_key = st.secrets['AVIATIONSTACK_API_KEY']
 api_key = '04360d2c8eff0da265c69169b6e68b87'
 #endpoints = [
-#    'flights', 
-#    'routes', 
-#    'airports', 
-#    'airlines', 
-#    'airplanes',
-#    'aircraft_types',
-#    'aviation_taxes',
-#    'cities',
-#    'countries',
-#    'flight_schedules',
-#    'future_flight_schedules'
+#    'flights', INGESTED, NOT DEVELOPED YET
+#    'routes', INGESTED, NOT DEVELOPED YET, ERROR
+#    'airports', INGESTED 
+#    'airlines', INGESTED
+#    'airplanes', INGESTED
+#    'aircraft_types', INGESTED, NOT USING
+#    'aviation_taxes', INGESTED, NOT USING, ERROR
+#    'cities', INGESTED, NOT DEVELOPED YET
+#    'countries', INGESTED, NOT DEVELOPED YET
+#    'flight_schedules', INGESTED, NOT DEVELOPED YET, ERROR
+#    'future_flight_schedules' INGESTED, NOT DEVELOPED YET, ERROR
 #]
 endpoints = [
+    #'aircraft_types',
     'airlines',
     'airplanes',
-    'countries'
+    'airports',
+    #'aviation_taxes',
+    'cities',
+    'countries',
+    'flights',
+    #'flight_schedules'
+    #'future_flight_schedules'
+    #'routes'
 ]
 selected_endpoint = st.sidebar.selectbox('Select Endpoint', 
                                          sorted(endpoints),
@@ -73,9 +81,9 @@ st.write(f'Total records fetched: {len(df)}')
 st.caption(f'Dataset limited to {len(df)} records for demonstration purposes.')
 st.divider()
 
-
-
-
+# --------------------------------------------------
+# -------------------- AIRLINES --------------------
+# --------------------------------------------------
 if selected_endpoint == 'airlines':
     st.subheader('Airline Information Analysis')
     st.write('This section provides insights into the airline data fetched from the Aviation Stack API.')
@@ -208,9 +216,9 @@ if selected_endpoint == 'airlines':
                            showlegend=False)
         st.plotly_chart(fig2, use_container_width=True)
 
-
-
-
+# --------------------------------------------------
+# -------------------- AIRPLANES -------------------
+# --------------------------------------------------
 if selected_endpoint == 'airplanes':
     st.subheader('Airplane Information Analysis')
     st.write('This section provides insights into the airplane data fetched from the Aviation Stack API.')
@@ -323,6 +331,54 @@ if selected_endpoint == 'airplanes':
         st.dataframe(filtered_df)
         st.write(f'Total records after filtering: {len(filtered_df)}')
 
+# --------------------------------------------------
+# -------------------- AIRPORTS --------------------
+# --------------------------------------------------
+if selected_endpoint == 'airports':
+    st.subheader('Airport Information Analysis')
+    st.write('This section provides insights into the airport data fetched from the Aviation Stack API.')
+    df.drop('phone_number', axis=1, inplace=True, errors='ignore')
+
+    df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce')
+    df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce')
+    df['timezone'] = df['timezone'].fillna('Unknown')
+    most_airports_per_country = df['country_name'].value_counts().head(1)
+    country_with_most_airports = most_airports_per_country.index[0]
+    count_most_airports_country = most_airports_per_country.iloc[0]
+    most_airports_per_timezone = df['timezone'].value_counts().head(1)
+    timezone_with_most_airports = most_airports_per_timezone.index[0]
+    count_most_airports_timezone = most_airports_per_timezone.iloc[0]
+
+    airport_tab1, airport_tab2, airport_tab3 = st.tabs(['Key Metrics', 'Visualizations', 'Airport Locations'])
+
+    with airport_tab1:
+        col1, col2 = st.columns(2)
+        col1.metric('Country with the Most Airports', country_with_most_airports,
+                  delta=count_most_airports_country)
+        col2.metric('Timezone with the Most Airports', timezone_with_most_airports,
+                    delta=count_most_airports_timezone)
+    with airport_tab2:
+        col1, col2 = st.columns(2)
+        with col1:
+            fig1 = px.bar(df['country_name'].value_counts().head(10),
+                        title='Top 10 Countries with the Most Airports')
+            fig1.update_layout(xaxis_title='Country', yaxis_title='# of Airports',
+                               showlegend=False)
+            st.plotly_chart(fig1, use_container_width=True)
+        with col2:
+            fig2 = px.bar(df['timezone'].value_counts().head(10),
+                        title='Top 10 Time Zones with the Most Airports')
+            fig2.update_layout(xaxis_title='Time Zone', yaxis_title='# of Airports',
+                               showlegend=False)
+            st.plotly_chart(fig2, use_container_width=True)
+    with airport_tab3:
+        map_fig = px.scatter_geo(df, lat='latitude', lon='longitude',
+                                 hover_name='airport_name', color_continuous_scale='red',
+                                 title='Airport Locations Worldwide')
+        map_fig.update_layout(geo=dict(bgcolor='black'))
+        st.plotly_chart(map_fig, use_container_width=True)
+        #st.map(df[['latitude', 'longitude']].dropna(),
+        #        use_container_width=True)    
 
 st.markdown('---')
 st.caption('Data provided by AviationStack API. Dashboard built with Streamlit.')
