@@ -17,7 +17,8 @@ except Exception as e:
 
 try:
     df = conn.query('SELECT * FROM KAGGLE.ride_bookings;')
-    st.write(df)
+    df2 = df.copy()
+    st.write(df2)
 except Exception as e:
     st.error(f'Query error: {e}')
 
