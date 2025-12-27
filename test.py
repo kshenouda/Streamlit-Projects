@@ -1,6 +1,17 @@
 import streamlit as st
 import mysql.connector
-#import mysqlclient
+import pandas as pd
+import plotly.express as px
+# import mysqlclient
+
+st.set_page_config(page_title='Uber Ride Bookings', layout='wide')
+st.title('Uber Ride Bookings')
+st.markdown('''
+The following dataset contains ride-sharing data from Uber for the
+year 2024, providing insights into booking patterns, vehicle
+performance, revenue streams, cancellation behaviors, and
+customer satisfaction metrics.
+''')
 
 conn = mysql.connector.connect(
     host='localhost',
