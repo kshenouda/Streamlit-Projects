@@ -13,39 +13,59 @@ pages = [
     'Column Overview',
     'Summary Stats',
     'Visualizations',
-    'Data Dictionary'
+    'Data Summary/Dictionary'
 ]
+st.sidebar.title('Student Performance')
 st.sidebar.header('Page Navigation')
 page_options = st.sidebar.radio('Select a page', pages)
 
 @st.cache_data
 def load_data():
-    df_math = pd.read_csv('/Users/kiroshenouda/Desktop/COMPSCI/DATASETS/student/student-mat.csv', sep=';')
-    df_port = pd.read_csv('/Users/kiroshenouda/Desktop/COMPSCI/DATASETS/student/student-por.csv', sep=';')
-    data = fetch_ucirepo(id=320)
-    X = data.data.features
-    y = data.data.targets
-    return df_math, df_port, X, y
+    try:
+        df_math = pd.read_csv('/Users/kiroshenouda/Desktop/COMPSCI/DATASETS/student/student-mat.csv', sep=';')
+        df_port = pd.read_csv('/Users/kiroshenouda/Desktop/COMPSCI/DATASETS/student/student-por.csv', sep=';')
+        data = fetch_ucirepo(id=320)
+        X = data.data.features
+        y = data.data.targets
+        return df_math, df_port, X, y
+    except FileNotFoundError:
+        st.error('Data files not found.')
+        st.stop()
+    except Exception as e:
+        st.error(f'Error loading data: {str(e)}')
+        st.stop()
 
-df_math, df_port, X, y = load_data()
+with st.spinner('Loading data...'):
+    df_math, df_port, X, y = load_data()
 
 port_num_cols = df_port.select_dtypes(include='number').columns.tolist()
 port_cat_cols = df_port.select_dtypes(include='object').columns.tolist()
-math_num_cols = df_port.select_dtypes(include='number').columns.tolist()
-math_cat_cols = df_port.select_dtypes(include='object').columns.tolist()
+math_num_cols = df_math.select_dtypes(include='number').columns.tolist()
+math_cat_cols = df_math.select_dtypes(include='object').columns.tolist()
 
 if page_options == pages[0]:
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric('Math Students', len(df_math))
+    with col2:
+        st.metric('Portuguese Students', len(df_port))
+    with col3:
+        st.metric('Total Features', len(df_math.columns))
     st.markdown('''
-    This application will allow users to analysis and explore the Student
-    Performance dataset, and predict student performance in high school.
+    ### About this Application
+    This application will allow users to analysis and explore student
+    performance in Portuguese and Mathematics courses at two
+    different Portuguese schools.
 
-    We will be working with two different files for this analysis:
-    * *student_mat.csv*
-    * *student_por.csv*
+    ### Dataset Information
+    - **student-mat.csv**: Mathematics course performance
+    - **student-por.csv**: Portuguese course performance
 
-    The *student_mat* file will contain students' information about their
-    Mathematics course, and the *student_pat* file will contain students'
-    performance about their Portuguese course.
+    ### Features You Can Explore:
+    - Student demographics (e.g. age, gender, family)
+    - Study habits and free time
+    - Final grades (G1, G2, G3)
+    - Social and health factors
 
     You can navigate between the different pages of this application
     from the sidebar on the left.
@@ -57,29 +77,59 @@ if page_options == pages[1]:
     port_tab, math_tab = st.tabs(['Portuguese Table', 'Mathematics Table'])
     with port_tab:
         st.subheader('Portuguese Table Overview')
-        st.write(df_port.head(10))
-        st.subheader('Columns and Data Types')
-        st.write(pd.DataFrame({
-            'Column': df_port.columns,
-            'Data Type': df_port.dtypes
-        }))
-        st.markdown('''
-        Fortunately, the data types for each column are correct, meaning
-        our analysis, visualization, and validation will be accurate.
-        ''')
+        port_col1, port_col2 = st.columns(2)
+        with port_col1:
+            show_rows = st.slider('Number of rows to display', 5, 50, 10, key='port_slider')
+        with port_col2:
+            search_col = st.selectbox('Filter by column', df_port.columns, key='port_selectbox')
+        st.dataframe(df_port.head(show_rows), use_container_width=True)
+
+        st.subheader('Quick Statistics')
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric('Average Final Grade (G3)', f'{df_port.G3.mean():.2f}')
+        with col2:
+            st.metric('Pass Rate', f'{(df_port.G3 >= 10).sum() / len(df_port) * 100:.1f}%')
+        with col3:
+            st.metric('Female Students', f"{(df_port['sex'] == 'F').sum()}")
+        with col4:
+            st.metric('Male Students', f"{(df_port['sex'] == 'M').sum()}")
+
+        with st.expander('View Column Details'):
+            st.dataframe(pd.DataFrame({
+                'Column': df_port.columns,
+                'Data Type': df_port.dtypes,
+                'Non-Null Counts': df_port.count(),
+                'Unique Values': df_port.nunique()
+            }), use_container_width=True)
+
     with math_tab:
         st.subheader('Mathematics Table Overview')
-        st.write(df_math.head(10))
-        st.subheader('Columns and Data Types')
-        st.write(pd.DataFrame({
-            'Column': df_math.columns,
-            'Data Type': df_math.dtypes
-        }))
-        st.markdown('''
-        Like the Portuguese table, the Mathematics table also has
-        correct data types for each column. We can move forward
-        with next steps.
-        ''')
+        math_col1, math_col2 = st.columns(2)
+        with math_col1:
+            show_rows = st.slider('Number of rows to display', 5, 50, 10, key='math_slider')
+        with math_col2:
+            search_col = st.selectbox('Filter by column', df_math.columns, key='math_selectbox')
+        st.dataframe(df_math.head(show_rows), use_container_width=True)
+
+        st.subheader('Quick Statistics')
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric('Average Final Grade (G3)', f'{df_math.G3.mean():.2f}')
+        with col2:
+            st.metric('Pass Rate', f'{(df_math.G3 >= 10).sum() / len(df_math) * 100:.1f}%')
+        with col3:
+            st.metric('Female Students', f"{(df_math['sex'] == 'F').sum()}")
+        with col4:
+            st.metric('Male Students', f"{(df_math['sex'] == 'M').sum()}")
+
+        with st.expander('View Column Details'):
+            st.dataframe(pd.DataFrame({
+                'Column': df_math.columns,
+                'Data Type': df_math.dtypes,
+                'Non-Null Counts': df_math.count(),
+                'Unique Values': df_math.nunique()
+            }), use_container_width=True)
 
 if page_options == pages[2]:
     st.subheader('Column Overview')
@@ -96,8 +146,8 @@ if page_options == pages[2]:
         st.success('File contains no missing values')
     else:
         st.dataframe(pd.DataFrame({
-            'Missing Values': missing_values,
-            'Missing Value Percentage': missing_values_pct
+            'Missing Values': missing_data,
+            'Missing Value Percentage': missing_data_pct
         }))
         st.caption(f'Dataset contains {missing_values.sum()} missing values')
 
@@ -205,16 +255,38 @@ if page_options == pages[4]:
         ''')
         col1, col2 = st.columns(2)
         with col1:
-            port_selected_num_col = st.selectbox('Numeric columns (Portuguese)',
+            st.subheader('Portuguese Class')
+            port_selected_num_col = st.selectbox('Numeric column',
                                                 options=port_num_cols,
-                                                index=None)
-            if port_selected_num_col is not None:
-                port_fig = px.scatter(df_port, x=port_selected_num_col, y='G1',
-                                        title=f'Correlation Between G1 and {port_selected_num_col}',
-                                        trendline='ols')                
-                st.plotly_chart(port_fig, use_container_width=False)
-            #else:
-            #    st.info('Start by selecting a column.')
+                                                index=None,
+                                                key='port_corr_num')
+            port_grade = st.selectbox('Grade period',
+                                    options=['G1', 'G2', 'G3'],
+                                    index=2,
+                                    key='port_grade')
+            if port_selected_num_col:
+                port_fig = px.scatter(df_port, x=port_selected_num_col, y=port_grade,
+                                    title=f'Correlation: {port_grade} vs {port_selected_num_col}',
+                                    trendline='ols',
+                                    trendline_color_override='red')
+                st.plotly_chart(port_fig, use_container_width=True)
+    
+        with col2:
+            st.subheader('Mathematics Class')
+            math_selected_num_col = st.selectbox('Numeric column',
+                                                options=math_num_cols,
+                                                index=None,
+                                                key='math_corr_num')
+            math_grade = st.selectbox('Grade period',
+                                    options=['G1', 'G2', 'G3'],
+                                    index=2,
+                                    key='math_grade')
+            if math_selected_num_col:
+                math_fig = px.scatter(df_math, x=math_selected_num_col, y=math_grade,
+                                    title=f'Correlation: {math_grade} vs {math_selected_num_col}',
+                                    trendline='ols',
+                                    trendline_color_override='red')
+                st.plotly_chart(math_fig, use_container_width=True)
 
 if page_options == pages[5]:
     st.subheader('Data Summary and Dictionary')
