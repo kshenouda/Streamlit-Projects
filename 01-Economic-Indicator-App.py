@@ -59,7 +59,6 @@ interval = {
 
 selected_metric = st.sidebar.selectbox('Select a metric', list(metric.keys()))
 selected_interval = interval[selected_metric]
-# show_yoy = st.sidebar.checkbox('Show YoY% Change')
 
 # Cached request
 @st.cache_data(ttl=3600, show_spinner='Fetching data...')
@@ -77,8 +76,6 @@ def econ_indicator(metric: str, interval: str) -> pd.DataFrame:
     df = pd.DataFrame(data['data'])
     df['value'] = pd.to_numeric(df['value'], errors='coerce') # df['value'].astype(float)
     df['date'] = pd.to_datetime(df['date']).dt.date
-    if show_yoy:
-        df['value'] = df['value'].pct_change(12) * 100
     return df.sort_values('date', ascending=False)
 
 # Main logic
