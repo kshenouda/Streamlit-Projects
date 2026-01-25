@@ -71,12 +71,13 @@ selected_dataset = st.selectbox('Select a dataset you would like to explore', li
 df = pd.DataFrame(datasets[selected_dataset]) 
 # df2 = st.dataframe(datasets[selected_dataset])
 st.dataframe(df)
+# st.caption(f'Returned rows: {len(df)}')
 
 '''
 ## Summary Statistics
 '''
 with st.container(horizontal = True, gap = 'medium'):
-    cols = st.columns(3, gap = 'medium', width = 900)
+    cols = st.columns(2, gap = 'medium', width = 900)
     with cols[0]:
         st.metric(
             'Row Count',
@@ -85,14 +86,27 @@ with st.container(horizontal = True, gap = 'medium'):
         )
     with cols[1]:
         st.metric(
+            'Column Count',
+            len(df.columns),
+            width = 'content'
+        )
+    cols = st.columns(3, gap = 'medium', width = 900)
+    with cols[0]:
+        st.metric(
             'Numerical Column Count',
             len(df.select_dtypes(include=["number"]).columns),
             width = 'content'
         )
-    with cols[2]:
+    with cols[1]:
         st.metric(
             'Categorical Column Count',
             len(df.select_dtypes(include=["object"]).columns),
+            width = 'content'
+        )
+    with cols[2]:
+        st.metric(
+            'Datetime Column Count',
+            len(df.select_dtypes(include=['datetime']).columns),
             width = 'content'
         )
 
