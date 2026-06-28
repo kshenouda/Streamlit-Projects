@@ -14,7 +14,7 @@ endpoint_selected = st.selectbox('Select an endpoint',
                                     index=None)
 
 headers = {
-    'x-rapidapi-key': '666e934e24msh842e981f4ebcf90p1369d1jsnfa7f40147688',
+    'x-rapidapi-key': f'{rapidapi_key}',
     'x-rapidapi-host': 'jsearch.p.rapidapi.com'
 }
 
